@@ -1,184 +1,252 @@
-# Catalog X - Flutter BLoC Assessment
+# Mini Catalog – Flutter + BLoC Product Experience
 
-A professional product catalog application built with Flutter and BLoC pattern, featuring clean architecture, offline support, and modern UI design.
+Mini Catalog is a one-day assessment project intentionally engineered as a production-ready reference for Flutter, Clean Architecture, and BLoC. It delivers a polished shopping catalogue experience with search, category filters, pagination, offline caching, and detailed product views while showcasing a maintainable, testable code base.
 
-## Features
+<p align="center">
+   <strong>Key pillars</strong>: Clean architecture • BLoC state management • Offline-first mindset • Material&nbsp;3 UX • Exhaustive testing
+</p>
 
-- 📱 **Product Catalog**: Grid layout with search and category filtering
-- 🔍 **Smart Search**: Debounced search with 400ms delay
-- 🏷️ **Category Filters**: Horizontal scrollable chips for easy filtering
-- 📄 **Product Details**: Comprehensive product information with images
-- 🔄 **Pull-to-Refresh**: Refresh product data with intuitive gesture
-- ♾️ **Infinite Scroll**: Seamless pagination with automatic loading
-- 🌐 **Offline Support**: Cached data available without internet
-- 🎨 **Modern UI**: Material 3 design with smooth animations
-- 🏗️ **Clean Architecture**: Separation of concerns with testable code
-- 🧪 **Comprehensive Testing**: Unit tests for BLoCs and widget tests
+---
 
-## Architecture
+## Table of contents
 
-The app follows Clean Architecture principles with clear separation of layers:
+1. [Feature highlights](#feature-highlights)
+2. [Architecture at a glance](#architecture-at-a-glance)
+3. [Codebase structure](#codebase-structure)
+4. [State management & flows](#state-management--flows)
+5. [Data layer & caching strategy](#data-layer--caching-strategy)
+6. [UX decisions & visual design](#ux-decisions--visual-design)
+7. [Testing strategy](#testing-strategy)
+8. [Runbook](#runbook)
+9. [Configuration & environments](#configuration--environments)
+10. [Known limitations & trade-offs](#known-limitations--trade-offs)
+11. [Future enhancements](#future-enhancements)
+12. [Contributing](#contributing)
 
-📁 Presentation Layer (UI + BLoC)
-↓
-📁 Domain Layer (Entities + Use Cases)
-↓
-📁 Data Layer (Repository + Data Sources)
+---
 
-sql_more
+## Feature highlights
 
+- **Responsive catalogue grid** populated from the Fake Store API or cached data.
+- **Search that feels smart**: 400 ms debounced queries scored by relevance (full-word matches outrank fuzzy matches).
+- **Composable filters**: category chips and search combine seamlessly, including when offline.
+- **Infinite scroll + pull-to-refresh** with clear differentiation between initial load and “load more”.
+- **Offline-first fallback**: first-page cache, category cache, and per-product cache stored via `SharedPreferences`.
+- **Detail view** with imagery, pricing, description, and metadata.
+- **Modern Material 3 interface** with shimmer placeholders, staggered entrance animations, and snack-bar driven recoveries.
+- **Robust error handling**: network awareness, retry affordances, and unobtrusive status messaging.
 
-### Key Components
+---
 
-- **BLoC Pattern**: State management with flutter_bloc
-- **Repository Pattern**: Abstraction between data sources
-- **Dependency Injection**: GetIt for managing dependencies
-- **Network Layer**: Dio for HTTP requests with error handling
-- **Caching**: SharedPreferences for offline data persistence
-- **Testing**: Comprehensive unit and widget tests
+## Architecture at a glance
 
-## Getting Started
+```
+┌──────────┐      ┌──────────────┐      ┌─────────────┐
+│ Widgets  │ ───▶ │  BLoC / Cubit│ ───▶ │    Use /    │
+│ + Routes │      │  (Presentation│      │ Repository  │
+└──────────┘      │    Layer)     │      │   (Domain)  │
+                           └──────┬───────┘      └──────┬──────┘
+                                     │                    │
+                                     ▼                    ▼
+                         ┌──────────────┐     ┌──────────────────┐
+                         │ Local Source │     │ Remote Source     │
+                         │ SharedPrefs  │     │ Dio + FakeStore   │
+                         └──────────────┘     └──────────────────┘
+```
+
+- **Presentation** is driven by `flutter_bloc`, keeping UI reactive and declarative.
+- **Domain** uses repository interfaces (`ProductRepository`) to decouple features from data implementations.
+- **Data** coordinates online/offline decisions, applies filtering/pagination, and persists cached snapshots.
+- **Dependency injection** is provided by `GetIt` (`lib/injection_container.dart`), enabling effortless test doubles.
+
+---
+
+## Codebase structure
+
+```
+lib/
+├─ app/                 # MaterialApp, theme, and route wiring
+├─ core/                # Constants, errors, network info, reusable widgets
+│  ├─ constants/
+│  ├─ errors/
+│  ├─ network/
+│  └─ utils/
+├─ features/
+│  ├─ catalog/
+│  │  ├─ data/          # Remote/local data sources, models, repository impl
+│  │  ├─ domain/        # Entities + repository contracts
+│  │  └─ presentation/  # Pages, widgets, blocs
+│  └─ product_detail/
+│     └─ presentation/  # Detail BLoC + UI
+└─ injection_container.dart
+
+test/
+├─ features/catalog/presentation/blocs/     # bloc_test suites
+├─ features/catalog/presentation/pages/     # widget tests
+├─ helpers/                                 # shared test utilities
+└─ widget_test.dart                         # higher-level smoke/integration tests
+```
+
+---
+
+## State management & flows
+
+### Catalog flow
+
+`CatalogBloc` orchestrates list retrieval, pagination, and user intents. Key events include:
+
+- `CatalogStarted` → primes cache, fetches categories + first page.
+- `CatalogQueryChanged` → debounced search, resets pagination, updates results.
+- `CatalogCategoryChanged` → toggles category filters, integrates with search term.
+- `CatalogLoadMore` → paginated fetch with `hasMore` safeguards & loading spinners.
+- `CatalogRefreshed` / `CatalogRetryRequested` → refresh/pull-to-refresh & recover from errors.
+
+The bloc state tracks `status`, `products`, `page`, `hasMore`, `query`, selected category, inline `snackbarMessage`, and `isLoadingMore`. Failure cases degrade gracefully: if we already have data and the network fails, a snackbar surfaces the issue without dumping the list.
+
+### Product detail flow
+
+`ProductDetailBloc` performs a deterministic fetch per `productId`. Results are cached so revisiting a product while offline uses the saved snapshot. Errors surface through the same bloc-driven pattern, allowing retry actions.
+
+### Search intelligence
+
+Both remote and cached search use a relevance score:
+
+1. Exact title matches
+2. Starts-with matches
+3. Whole-word matches within title
+4. Substring matches in title
+5. Exact/partial category matches
+6. Description relevance
+
+Only products within one score of the top hit survive, ensuring focused results.
+
+---
+
+## Data layer & caching strategy
+
+| Concern             | Online path                                                                 | Offline path                                                                  |
+|--------------------|------------------------------------------------------------------------------|-------------------------------------------------------------------------------|
+| Products list      | `ProductRemoteDataSource.getProducts` → local pagination → cache first page | `ProductLocalDataSource.getCachedProducts` → filter + paginate locally        |
+| Categories         | Remote fetch + sanitise (trim/unique/sort) → cache                          | Read cached list → fallback to deriving from cached products if necessary    |
+| Product detail     | Fetch by ID → cache json snapshot                                           | Serve cached product by key                                                   |
+
+Implementation notes:
+
+- Remote requests use `dio` with dedicated error mapping to `Failure` types (`NetworkFailure`, `ServerFailure`).
+- `SharedPreferences` stores JSON payloads for lists and per-product snapshots.
+- `Connectivity` is checked one time per request through `NetworkInfo`, preventing fragile ping loops.
+- Pagination is kept client-side (Fake Store API limitation). `_paginateProducts` performs safe sub-list slicing.
+
+---
+
+## UX decisions & visual design
+
+- **Material 3** color scheme and typography with light/dark support.
+- **Custom search bar** integrates search history chips via `SearchHistoryStorage` (persisted locally).
+- **Category chips** reflect current selection, with quick toggle to refresh or clear.
+- **Animated grid** (`flutter_staggered_animations`) creates a smooth, lively catalogue.
+- **Loading states**:
+   - Global loading → `LoadingWidget` grid shimmer.
+   - Infinite scroll → inline circular spinner below grid.
+- **Error surface**: `ErrorDisplayWidget` centralises messaging, offers “Try Again”, and respects bottom insets.
+- **Snackbar messaging** for transient connectivity hiccups (with `Retry` action hooked to the bloc).
+
+---
+
+## Testing strategy
+
+| Layer      | Tooling              | Coverage highlights                                                           |
+|------------|----------------------|-------------------------------------------------------------------------------|
+| BLoC       | `bloc_test`, `mocktail` | Startup sequence, error paths, debounced search, pagination success/failure, offline snackbar behaviour |
+| Widgets    | `flutter_test`          | Catalogue screen transitions (loading → data → error), empty state rendering |
+| Integration| Custom smoke tests      | Whole-app widget test (`test/widget_test.dart`) ensures wiring and DI remain healthy |
+
+All tests are deterministic thanks to dependency injection: network, repositories, and storage can be mocked or faked.
+
+---
+
+## Runbook
 
 ### Prerequisites
 
-- Flutter 3.19+ 
-- Dart 3.0+
-- Android Studio / VS Code
-- Internet connection for initial data fetch
+- Flutter **3.32.0+** (project developed against 3.32.7)
+- Dart **3.8.1** (bundled with Flutter toolchain)
+- Android SDK / Xcode for respective platforms
+- Optional: iOS/macOS runners require macOS with CocoaPods installed
 
-### Installation
+### Setup
 
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd mini_catalog
-Install dependencies
-
-bash
-
+```bash
+git clone https://github.com/abeelgetahun/catalog_x.git
+cd catalog_x
 flutter pub get
-Run the app
+```
 
-bash
+### Launch
 
-flutter run
-Testing
-Run all tests:
+```bash
+# choose one of the supported targets
+flutter run        # auto-detects connected device or emulator
+```
 
-bash
+### Test
 
-flutter test
-Run tests with coverage:
+```bash
+flutter test                                # run entire suite
+flutter test --coverage                     # collect coverage (optional)
+flutter test test/features/.../catalog_bloc_test.dart
+flutter test test/features/.../catalog_page_test.dart
+```
 
-bash
+> The default `test/widget_test.dart` has been repurposed into a higher-level smoke suite that spins up the DI container; ensure `flutter pub run build_runner` is **not** required—everything is runtime-configured.
 
-flutter test --coverage
-API Integration
-The app uses the Fake Store API for product data:
+---
 
-Products: GET /products with pagination
-Categories: GET /products/categories
-Product Details: GET /products/{id}
-Category Filter: GET /products/category/{name}
-Technical Implementation
-State Management
-The app uses BLoC pattern with the following key blocs:
+## Configuration & environments
 
-CatalogBloc: Manages product list, search, filters, and pagination
-ProductDetailBloc: Handles individual product detail loading
-Caching Strategy
-First Page Cache: Only the first page of products is cached to prevent storage bloat
-Category Cache: All categories are cached for offline filtering
-Product Details: Individual products are cached when viewed
-Network Awareness: Automatically falls back to cache when offline
-Search & Filtering
-Debounced Search: 400ms delay prevents excessive API calls
-Composable Filters: Search works in combination with category filters
-Client-side Logic: Filtering and pagination handled locally for better performance
-Pagination
-Infinite Scroll: Automatically loads more items when user scrolls to bottom
-Page Management: Tracks current page and whether more items are available
-Loading States: Clear indicators for initial loading vs. loading more
-UI/UX Features
-Material 3 Design: Modern, accessible interface
-Responsive Grid: Adaptive layout for different screen sizes
-Staggered Animations: Smooth item appearance animations
-Loading Shimmer: Skeleton loading for better perceived performance
-Error Handling: User-friendly error messages with retry options
-Image Caching: Efficient image loading with cached_network_image
-Testing Strategy
-Unit Tests
-CatalogBloc: Happy path and error scenarios
-Repository: Data source integration
-Mock Dependencies: Isolated component testing
-Widget Tests
-CatalogPage: Loading, success, and error states
-User Interactions: Search, filter, and navigation
-State Verification: UI reflects bloc state changes
-Trade-offs & Decisions
-Architectural Decisions
-Client-side Pagination: Fake Store API limitations required client-side implementation
-Limited Caching: Only cache first page to prevent storage issues
-Repository Pattern: Abstraction allows easy switching between data sources
-BLoC over Provider: Better testing support and event-driven architecture
-Performance Optimizations
-Image Caching: Reduces bandwidth and improves loading times
-Debounced Search: Prevents API spam during typing
-Efficient Pagination: Only loads necessary data
-State Persistence: Maintains scroll position during navigation
-Known Limitations
-Search Scope: Search only works on loaded products, not full catalog
-Offline Filtering: Limited to cached data when offline
-Image Dependencies: Requires internet for first-time image loading
-API Constraints: Limited by Fake Store API capabilities
-Dependencies
-Core
-flutter_bloc ^8.1.3 - State management
-equatable ^2.0.5 - Value equality
-dartz ^0.10.1 - Functional programming
-Network & Data
-dio ^5.3.2 - HTTP client
-shared_preferences ^2.2.2 - Local storage
-connectivity_plus ^5.0.1 - Network status
-UI & UX
-cached_network_image ^3.3.0 - Image caching
-shimmer ^3.0.0 - Loading animations
-flutter_staggered_animations ^1.1.1 - List animations
-Development
-bloc_test ^9.1.4 - BLoC testing utilities
-mocktail ^1.0.0 - Mocking framework
-flutter_lints ^3.0.0 - Code analysis
-Future Enhancements
- Product favoriting with local persistence
- Shopping cart functionality
- Push notifications for deals
- Dark/Light theme toggle
- Search history persistence
- Product comparison feature
- Share product functionality
- Advanced filtering options
-Contributing
-Fork the repository
-Create a feature branch
-Make your changes
-Add tests for new functionality
-Ensure all tests pass
-Submit a pull request
-License
-This project is licensed under the MIT License - see the LICENSE file for details.
+- **API base URL** lives in `core/constants/api_constants.dart`. Swap endpoints via environment-specific constants if integrating with other backends.
+- **Search debounce** tuned in the same constants file (`Duration(milliseconds: 400)`).
+- **Pagination size** defaults to 20; adapt `ApiConstants.pageSize` to change client-side slicing globally.
+- **Dependency injection**: `lib/injection_container.dart` centralises registrations. Call `await init()` before running the app (handled in `main.dart`).
 
-sql_more
+---
 
+## Known limitations & trade-offs
 
-This implementation provides:
+| Constraint | Rationale | Potential mitigation |
+|------------|-----------|----------------------|
+| Client-side pagination only | Fake Store API does not expose page params | Replace data source or wrap API behind custom service that supports server-side paging |
+| Cached scope limited to first page | Avoids uncontrolled local storage growth | Extend caching shallow copies of subsequent pages or leverage Hive for structured persistence |
+| Search limited by loaded products when offline | Offline mode relies on cached first page | Persist wider catalogue or pre-fetch additional pages when bandwidth allows |
+| Image fetch requires network at least once | Images aren’t bundled locally | Provide local placeholders, integrate with `cached_network_image` offline store, or ship base64 fallbacks |
 
-1. **Clean Architecture** with proper separation of concerns
-2. **Professional UI** with Material 3 design and animations
-3. **Comprehensive BLoC implementation** with proper event handling
-4. **Robust caching and offline support**
-5. **Extensive testing** with unit and widget tests
-6. **Proper error handling** with user-friendly messages
-7. **Performance optimizations** like debouncing and image caching
-8. **Complete documentation** with setup instructions and architecture details
+---
 
-The project follows industry best practices and demonstrates mastery of Flutter, BLoC pattern, a
+## Future enhancements
+
+- Persisted wish list / favourites with local storage sync.
+- Cart & checkout exploration to exercise additional state machines.
+- Dynamic theming toggle with user preference persistence.
+- Product comparison view and richer filtering (price range, ratings).
+- Observability hooks (Sentry/Crashlytics) and in-app analytics for search success.
+- Integration tests using `integration_test` package for full navigation scenarios.
+
+---
+
+## Contributing
+
+1. Fork the repo and create a feature branch: `git checkout -b feature/amazing-improvement`.
+2. Keep the architecture contract intact (presentation ↔ domain ↔ data layers).
+3. Add or update tests alongside your changes.
+4. Run `flutter test` and ensure no analyzer warnings are introduced.
+5. Submit a pull request describing intent, decisions, and test evidence.
+
+---
+
+### License
+
+This project is released under the MIT License. See [LICENSE](LICENSE) for details.
+
+---
+
+Built with care to demonstrate a clean, professional, and scalable Flutter code base within one business day.
