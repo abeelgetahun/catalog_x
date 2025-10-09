@@ -159,24 +159,24 @@ Implementation notes:
 The following screens illustrate the customer journey from discovery through deep inspection, highlighting how the catalogue adapts to user intent.
 
 <div align="center">
-   <figure style="display:inline-block; margin:0 16px 24px; max-width:320px;">
-      <img src="screenshots/catalog_screen.jpg" alt="Catalog grid with product cards, shimmer placeholders, and category filters" width="100%" />
+   <figure style="margin:0 auto 28px; max-width:260px; text-align:center;">
+      <img src="screenshots/catalog_screen.jpg" alt="Catalog grid with product cards, shimmer placeholders, and category filters" style="width:100%; border-radius:16px;" />
       <figcaption><strong>Catalog overview:</strong> Responsive grid with animated entry, inline availability cues, and quick access to filter chips.</figcaption>
    </figure>
-   <figure style="display:inline-block; margin:0 16px 24px; max-width:320px;">
-      <img src="screenshots/search_screen.jpg" alt="Search experience with highlighted results and search history chips" width="100%" />
+   <figure style="margin:0 auto 28px; max-width:260px; text-align:center;">
+      <img src="screenshots/search_screen.jpg" alt="Search experience with highlighted results and search history chips" style="width:100%; border-radius:16px;" />
       <figcaption><strong>Precision search:</strong> Debounced, relevance-ranked results with persisted history chips for one-tap recall.</figcaption>
    </figure>
-   <figure style="display:inline-block; margin:0 16px 24px; max-width:320px;">
-      <img src="screenshots/product_catalog_skimmer.jpg" alt="Filter skimmer overlay showcasing category refinement" width="100%" />
+   <figure style="margin:0 auto 28px; max-width:260px; text-align:center;">
+      <img src="screenshots/product_catalog_skimmer.jpg" alt="Filter skimmer overlay showcasing category refinement" style="width:100%; border-radius:16px;" />
       <figcaption><strong>Category skimmer:</strong> Layered filter sheet that blends with the grid while keeping context visible.</figcaption>
    </figure>
-   <figure style="display:inline-block; margin:0 16px 24px; max-width:320px;">
-      <img src="screenshots/product_detail_page.jpg" alt="Product detail page with imagery, pricing, description, and metadata" width="100%" />
+   <figure style="margin:0 auto 28px; max-width:260px; text-align:center;">
+      <img src="screenshots/product_detail_page.jpg" alt="Product detail page with imagery, pricing, description, and metadata" style="width:100%; border-radius:16px;" />
       <figcaption><strong>Detail deep dive:</strong> Rich content layout featuring hero imagery, pricing, narrative copy, and calls to action.</figcaption>
    </figure>
-   <figure style="display:inline-block; margin:0 16px 24px; max-width:320px;">
-      <img src="screenshots/product_image_full_view.jpg" alt="Fullscreen lightbox of the product image with immersive photography" width="100%" />
+   <figure style="margin:0 auto 0; max-width:260px; text-align:center;">
+      <img src="screenshots/product_image_full_view.jpg" alt="Fullscreen lightbox of the product image with immersive photography" style="width:100%; border-radius:16px;" />
       <figcaption><strong>Image lightbox:</strong> Edge-to-edge media viewer for high-resolution imagery that supports pinch-and-pan gestures.</figcaption>
    </figure>
 </div>
