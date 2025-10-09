@@ -20,8 +20,9 @@ Mini Catalog is a one-day assessment project intentionally engineered as a produ
 8. [Runbook](#runbook)
 9. [Configuration & environments](#configuration--environments)
 10. [Known limitations & trade-offs](#known-limitations--trade-offs)
-11. [Future enhancements](#future-enhancements)
-12. [Contributing](#contributing)
+11. [UI samples](#ui-samples)
+12. [Future enhancements](#future-enhancements)
+13. [Contributing](#contributing)
 
 ---
 
@@ -150,6 +151,35 @@ Implementation notes:
    - Infinite scroll → inline circular spinner below grid.
 - **Error surface**: `ErrorDisplayWidget` centralises messaging, offers “Try Again”, and respects bottom insets.
 - **Snackbar messaging** for transient connectivity hiccups (with `Retry` action hooked to the bloc).
+
+---
+
+## UI samples
+
+The following screens illustrate the customer journey from discovery through deep inspection, highlighting how the catalogue adapts to user intent.
+
+<div align="center">
+   <figure style="display:inline-block; margin:0 16px 24px; max-width:320px;">
+      <img src="screenshots/catalog_screen.jpg" alt="Catalog grid with product cards, shimmer placeholders, and category filters" width="100%" />
+      <figcaption><strong>Catalog overview:</strong> Responsive grid with animated entry, inline availability cues, and quick access to filter chips.</figcaption>
+   </figure>
+   <figure style="display:inline-block; margin:0 16px 24px; max-width:320px;">
+      <img src="screenshots/search_screen.jpg" alt="Search experience with highlighted results and search history chips" width="100%" />
+      <figcaption><strong>Precision search:</strong> Debounced, relevance-ranked results with persisted history chips for one-tap recall.</figcaption>
+   </figure>
+   <figure style="display:inline-block; margin:0 16px 24px; max-width:320px;">
+      <img src="screenshots/product_catalog_skimmer.jpg" alt="Filter skimmer overlay showcasing category refinement" width="100%" />
+      <figcaption><strong>Category skimmer:</strong> Layered filter sheet that blends with the grid while keeping context visible.</figcaption>
+   </figure>
+   <figure style="display:inline-block; margin:0 16px 24px; max-width:320px;">
+      <img src="screenshots/product_detail_page.jpg" alt="Product detail page with imagery, pricing, description, and metadata" width="100%" />
+      <figcaption><strong>Detail deep dive:</strong> Rich content layout featuring hero imagery, pricing, narrative copy, and calls to action.</figcaption>
+   </figure>
+   <figure style="display:inline-block; margin:0 16px 24px; max-width:320px;">
+      <img src="screenshots/product_image_full_view.jpg" alt="Fullscreen lightbox of the product image with immersive photography" width="100%" />
+      <figcaption><strong>Image lightbox:</strong> Edge-to-edge media viewer for high-resolution imagery that supports pinch-and-pan gestures.</figcaption>
+   </figure>
+</div>
 
 ---
 
