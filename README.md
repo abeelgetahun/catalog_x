@@ -163,19 +163,19 @@ The following screens illustrate the customer journey from discovery through dee
       <tr>
          <td>
             <figure style="margin:0 18px 24px; max-width:210px; text-align:center;">
-               <img src="assets/screenshots/catalog_screen.jpg" alt="Catalog grid with product cards, shimmer placeholders, and category filters" style="width:100%; max-width:210px; height:auto; border-radius:12px;" />
+               <img src="screenshots/catalog_screen.jpg" alt="Catalog grid with product cards, shimmer placeholders, and category filters" style="width:100%; max-width:210px; height:auto; border-radius:12px;" />
                <figcaption><strong>Catalog overview:</strong> Responsive grid with animated entry, inline availability cues, and quick access to filter chips.</figcaption>
             </figure>
          </td>
          <td>
             <figure style="margin:0 18px 24px; max-width:210px; text-align:center;">
-               <img src="assets/screenshots/search_screen.jpg" alt="Search experience with highlighted results and search history chips" style="width:100%; max-width:210px; height:auto; border-radius:12px;" />
+               <img src="screenshots/search_screen.jpg" alt="Search experience with highlighted results and search history chips" style="width:100%; max-width:210px; height:auto; border-radius:12px;" />
                <figcaption><strong>Precision search:</strong> Debounced, relevance-ranked results with persisted history chips for one-tap recall.</figcaption>
             </figure>
          </td>
          <td>
             <figure style="margin:0 18px 24px; max-width:210px; text-align:center;">
-               <img src="assets/screenshots/product_catalog_skimmer.jpg" alt="Filter skimmer overlay showcasing category refinement" style="width:100%; max-width:210px; height:auto; border-radius:12px;" />
+               <img src="screenshots/product_catalog_skimmer.jpg" alt="Filter skimmer overlay showcasing category refinement" style="width:100%; max-width:210px; height:auto; border-radius:12px;" />
                <figcaption><strong>Category skimmer:</strong> Layered filter sheet that blends with the grid while keeping context visible.</figcaption>
             </figure>
          </td>
@@ -183,13 +183,13 @@ The following screens illustrate the customer journey from discovery through dee
       <tr>
          <td>
             <figure style="margin:0 18px 0; max-width:210px; text-align:center;">
-               <img src="assets/screenshots/product_detail_page.jpg" alt="Product detail page with imagery, pricing, description, and metadata" style="width:100%; max-width:210px; height:auto; border-radius:12px;" />
+               <img src="screenshots/product_detail_page.jpg" alt="Product detail page with imagery, pricing, description, and metadata" style="width:100%; max-width:210px; height:auto; border-radius:12px;" />
                <figcaption><strong>Detail deep dive:</strong> Rich content layout featuring hero imagery, pricing, narrative copy, and calls to action.</figcaption>
             </figure>
          </td>
          <td>
             <figure style="margin:0 18px 0; max-width:210px; text-align:center;">
-               <img src="assets/screenshots/product_image_full_view.jpg" alt="Fullscreen lightbox of the product image with immersive photography" style="width:100%; max-width:210px; height:auto; border-radius:12px;" />
+               <img src="screenshots/product_image_full_view.jpg" alt="Fullscreen lightbox of the product image with immersive photography" style="width:100%; max-width:210px; height:auto; border-radius:12px;" />
                <figcaption><strong>Image lightbox:</strong> Edge-to-edge media viewer for high-resolution imagery that supports pinch-and-pan gestures.</figcaption>
             </figure>
          </td>
